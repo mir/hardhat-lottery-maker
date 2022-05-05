@@ -31,7 +31,7 @@ export interface LotteryMakerInterface extends utils.Interface {
   functions: {
     "calculateWinner(uint256)": FunctionFragment;
     "changeCreatorFee(uint256)": FunctionFragment;
-    "createLottery(uint256,uint256)": FunctionFragment;
+    "createLottery(uint256)": FunctionFragment;
     "creatorFee()": FunctionFragment;
     "enterLottery(uint256)": FunctionFragment;
     "lotteryIDBalanceMapping(uint256)": FunctionFragment;
@@ -79,7 +79,7 @@ export interface LotteryMakerInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "createLottery",
-    values: [BigNumberish, BigNumberish]
+    values: [BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "creatorFee",
@@ -256,7 +256,6 @@ export interface LotteryMaker extends BaseContract {
 
     createLottery(
       entranceFee: BigNumberish,
-      durationSeconds: BigNumberish,
       overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -338,7 +337,6 @@ export interface LotteryMaker extends BaseContract {
 
   createLottery(
     entranceFee: BigNumberish,
-    durationSeconds: BigNumberish,
     overrides?: PayableOverrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -420,7 +418,6 @@ export interface LotteryMaker extends BaseContract {
 
     createLottery(
       entranceFee: BigNumberish,
-      durationSeconds: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -512,7 +509,6 @@ export interface LotteryMaker extends BaseContract {
 
     createLottery(
       entranceFee: BigNumberish,
-      durationSeconds: BigNumberish,
       overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -595,7 +591,6 @@ export interface LotteryMaker extends BaseContract {
 
     createLottery(
       entranceFee: BigNumberish,
-      durationSeconds: BigNumberish,
       overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 

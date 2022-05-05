@@ -59,11 +59,14 @@ contract LotteryMaker is Ownable, VRFConsumerBaseV2 {
         creatorFee = _newFee;
     }
 
-    function createLottery(uint entranceFee, uint durationSeconds) external payable {
+    function createLottery(uint entranceFee)
+        external payable 
+    {
         require(msg.value >= creatorFee, "Not enough ETH to create a lottery");
-        console.log("Create a lottery with fee", entranceFee);
+        console.log("Create a lottery with fee: ", entranceFee);
+        lotteryIDCounter.increment();
         uint lotteryID = lotteryIDCounter.current();        
-        console.log("LotteryID", lotteryID);
+        console.log("LotteryID: ", lotteryID);
         ownerLotteryIDMapping[msg.sender] = lotteryID;
         lotteryIDFeeMapping[lotteryID] = entranceFee;
         lotteryIDStateMapping[lotteryID] = LotteryState.Open;
