@@ -11,7 +11,12 @@ describe("LotteryMaker", function () {
     await lotteryMaker.deployed();
 
     const [owner, user1, user2] = await ethers.getSigners();    
-    return { lotteryMaker, owner, user1, user2 };
+
+    const feeInWei = ethers.utils.parseEther("0.001");
+    await lotteryMaker.createLottery(feeInWei);
+    const lotteryID = await lotteryMaker.ownerLotteryIDMapping(owner.address);
+
+    return { lotteryMaker, lotteryID, feeInWei, owner, user1, user2 };
   }
 
   it("Should deploy lottery maker with zero creating fee", async function () {
@@ -31,10 +36,7 @@ describe("LotteryMaker", function () {
   });
 
   it("User should enter a lottery", async function () {
-    const {lotteryMaker, owner, user1, user2} = await loadFixture(fixture);
-    const feeInWei = ethers.utils.parseEther("0.001");
-    await lotteryMaker.createLottery(feeInWei);
-    const lotteryID = await lotteryMaker.ownerLotteryIDMapping(owner.address);
+    const {lotteryMaker, lotteryID, feeInWei, user1} = await loadFixture(fixture);
 
     const feeToPay = feeInWei.add(100);
     await lotteryMaker.connect(user1).enterLottery(lotteryID, { from: user1.getAddress(), value: feeToPay });
@@ -43,15 +45,12 @@ describe("LotteryMaker", function () {
   });
 
   it("User should not enter a lottery", async function () {
-    const {lotteryMaker, owner, user1, user2} = await loadFixture(fixture);
-    const feeInWei = ethers.utils.parseEther("0.001");
-    await lotteryMaker.createLottery(feeInWei);
-    const lotteryID = await lotteryMaker.ownerLotteryIDMapping(owner.address);
+    const {lotteryMaker, lotteryID, feeInWei, user1} = await loadFixture(fixture);    
     
     const feeToFail = feeInWei.sub(100);
     await expect(lotteryMaker
-      .connect(user2)
-      .enterLottery(lotteryID, { from: user2.getAddress(), value: feeToFail })
+      .connect(user1)
+      .enterLottery(lotteryID, { from: user1.getAddress(), value: feeToFail })
     ).to.be.reverted;
   });
 });
