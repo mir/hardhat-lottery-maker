@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
-import {loadFixture, deployContract} from 'ethereum-waffle';
-import {Wallet, Contract, BigNumber} from "ethers";
+import {loadFixture} from 'ethereum-waffle';
+import {Wallet} from "ethers";
 import {MockProvider} from "ethereum-waffle";
 
 describe("LotteryMaker", function () {
@@ -10,9 +10,8 @@ describe("LotteryMaker", function () {
     const lotteryMaker = await LotteryMaker.deploy(0);
     await lotteryMaker.deployed();
 
-    const [owner] = await ethers.getSigners();
-
-    return { lotteryMaker, owner };
+    const [owner, user1, user2] = await ethers.getSigners();    
+    return { lotteryMaker, owner, user1, user2 };
   }
 
   it("Should deploy lottery maker with zero creating fee", async function () {
@@ -24,10 +23,35 @@ describe("LotteryMaker", function () {
     const {lotteryMaker, owner} = await loadFixture(fixture);
 
     const feeInWei = ethers.utils.parseEther("0.001");
-    await lotteryMaker.createLottery(feeInWei)        
+    await lotteryMaker.createLottery(feeInWei)
         
     const lotteryID = await lotteryMaker.ownerLotteryIDMapping(owner.address);    
     const fee = await lotteryMaker.lotteryIDFeeMapping(lotteryID);    
     expect(fee).to.equal(feeInWei);
+  });
+
+  it("User should enter a lottery", async function () {
+    const {lotteryMaker, owner, user1, user2} = await loadFixture(fixture);
+    const feeInWei = ethers.utils.parseEther("0.001");
+    await lotteryMaker.createLottery(feeInWei);
+    const lotteryID = await lotteryMaker.ownerLotteryIDMapping(owner.address);
+
+    const feeToPay = feeInWei.add(100);
+    await lotteryMaker.connect(user1).enterLottery(lotteryID, { from: user1.getAddress(), value: feeToPay });
+    const entrance0 = await lotteryMaker.lotteryIDEntrancesMapping(lotteryID, 0);    
+    expect(entrance0).to.equal(user1.address);    
+  });
+
+  it("User should not enter a lottery", async function () {
+    const {lotteryMaker, owner, user1, user2} = await loadFixture(fixture);
+    const feeInWei = ethers.utils.parseEther("0.001");
+    await lotteryMaker.createLottery(feeInWei);
+    const lotteryID = await lotteryMaker.ownerLotteryIDMapping(owner.address);
+    
+    const feeToFail = feeInWei.sub(100);
+    await expect(lotteryMaker
+      .connect(user2)
+      .enterLottery(lotteryID, { from: user2.getAddress(), value: feeToFail })
+    ).to.be.reverted;
   });
 });
