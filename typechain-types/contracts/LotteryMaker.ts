@@ -40,7 +40,7 @@ export interface LotteryMakerInterface extends utils.Interface {
     "lotteryIDFeeMapping(uint256)": FunctionFragment;
     "lotteryIDStateMapping(uint256)": FunctionFragment;
     "owner()": FunctionFragment;
-    "ownerLotteryIDMapping(address)": FunctionFragment;
+    "ownerLotteryIDMapping(address,uint256)": FunctionFragment;
     "rawFulfillRandomWords(uint256,uint256[])": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
     "requestIDLotteryIDMapping(uint256)": FunctionFragment;
@@ -112,7 +112,7 @@ export interface LotteryMakerInterface extends utils.Interface {
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "ownerLotteryIDMapping",
-    values: [string]
+    values: [string, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "rawFulfillRandomWords",
@@ -199,11 +199,25 @@ export interface LotteryMakerInterface extends utils.Interface {
   ): Result;
 
   events: {
+    "LotteryCreatedEvent(address,uint256)": EventFragment;
     "OwnershipTransferred(address,address)": EventFragment;
   };
 
+  getEvent(nameOrSignatureOrTopic: "LotteryCreatedEvent"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
 }
+
+export interface LotteryCreatedEventEventObject {
+  owner: string;
+  lotteryID: BigNumber;
+}
+export type LotteryCreatedEventEvent = TypedEvent<
+  [string, BigNumber],
+  LotteryCreatedEventEventObject
+>;
+
+export type LotteryCreatedEventEventFilter =
+  TypedEventFilter<LotteryCreatedEventEvent>;
 
 export interface OwnershipTransferredEventObject {
   previousOwner: string;
@@ -296,6 +310,7 @@ export interface LotteryMaker extends BaseContract {
 
     ownerLotteryIDMapping(
       arg0: string,
+      arg1: BigNumberish,
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
@@ -377,6 +392,7 @@ export interface LotteryMaker extends BaseContract {
 
   ownerLotteryIDMapping(
     arg0: string,
+    arg1: BigNumberish,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
@@ -458,6 +474,7 @@ export interface LotteryMaker extends BaseContract {
 
     ownerLotteryIDMapping(
       arg0: string,
+      arg1: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -486,6 +503,15 @@ export interface LotteryMaker extends BaseContract {
   };
 
   filters: {
+    "LotteryCreatedEvent(address,uint256)"(
+      owner?: null,
+      lotteryID?: null
+    ): LotteryCreatedEventEventFilter;
+    LotteryCreatedEvent(
+      owner?: null,
+      lotteryID?: null
+    ): LotteryCreatedEventEventFilter;
+
     "OwnershipTransferred(address,address)"(
       previousOwner?: string | null,
       newOwner?: string | null
@@ -549,6 +575,7 @@ export interface LotteryMaker extends BaseContract {
 
     ownerLotteryIDMapping(
       arg0: string,
+      arg1: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -631,6 +658,7 @@ export interface LotteryMaker extends BaseContract {
 
     ownerLotteryIDMapping(
       arg0: string,
+      arg1: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 

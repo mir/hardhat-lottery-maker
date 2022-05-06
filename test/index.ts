@@ -27,12 +27,9 @@ describe("LotteryMaker", function () {
   });
 
   it("Should create a lottery with 0.001 wei entrance fee", async function () {
-    const {lotteryMaker, owner} = await loadFixture(fixture);
-
-    const feeInWei = ethers.utils.parseEther("0.001");
-    await lotteryMaker.createLottery(feeInWei)
+    const {lotteryMaker, feeInWei, owner} = await loadFixture(fixture);
             
-    const lotteryID = await lotteryMaker.ownerLotteryIDMapping(owner.address);
+    const lotteryID = await lotteryMaker.ownerLotteryIDMapping(owner.address, 0);
     const fee = await lotteryMaker.lotteryIDFeeMapping(lotteryID);    
     expect(fee).to.equal(feeInWei);
   });
@@ -41,7 +38,7 @@ describe("LotteryMaker", function () {
     const {lotteryMaker, feeInWei, owner, user1} = await loadFixture(fixture);
 
     const feeToPay = feeInWei.add(100);
-    const lotteryID = await lotteryMaker.ownerLotteryIDMapping(owner.address);
+    const lotteryID = await lotteryMaker.ownerLotteryIDMapping(owner.address, 0);
     await lotteryMaker
       .connect(user1)
       .enterLottery(
@@ -56,7 +53,7 @@ describe("LotteryMaker", function () {
     const {lotteryMaker, feeInWei, owner, user1} = await loadFixture(fixture);    
         
     const feeToFail = feeInWei.sub(100);
-    const lotteryID = await lotteryMaker.ownerLotteryIDMapping(owner.address);
+    const lotteryID = await lotteryMaker.ownerLotteryIDMapping(owner.address, 0);
     await expect(lotteryMaker
       .connect(user1)
       .enterLottery(lotteryID, { from: user1.getAddress(), value: feeToFail })
@@ -66,7 +63,7 @@ describe("LotteryMaker", function () {
   it("Should stop a lottery from entering", async function () {
     const {lotteryMaker, feeInWei, owner, user2} = await loadFixture(fixture);    
     const feeToPay = feeInWei.add(100);
-    const lotteryID = await lotteryMaker.ownerLotteryIDMapping(owner.address);
+    const lotteryID = await lotteryMaker.ownerLotteryIDMapping(owner.address, 0);
     await lotteryMaker
       .connect(user2)
       .enterLottery(lotteryID, { from: user2.getAddress(), value: feeToPay });
@@ -85,8 +82,8 @@ describe("LotteryMaker", function () {
   });
 
   it("Should fire calculating a winner", async function () {
-    const {lotteryMaker, feeInWei, owner} = await loadFixture(fixture);
-    const lotteryID = await lotteryMaker.ownerLotteryIDMapping(owner.address);
+    const {lotteryMaker, owner} = await loadFixture(fixture);    
+    const lotteryID = await lotteryMaker.ownerLotteryIDMapping(owner.address, 0);
     await lotteryMaker.connect(owner).calculateWinner(lotteryID);    
       
     expect(await lotteryMaker.lotteryIDStateMapping(lotteryID))
