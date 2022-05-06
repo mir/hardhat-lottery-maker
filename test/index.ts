@@ -6,7 +6,7 @@ import {MockProvider} from "ethereum-waffle";
 
 describe("LotteryMaker", function () {
 
-  enum LotteryState {Open, Stopped, MoneyTransfered};
+  enum LotteryState {Open, Stopped, Calculating, MoneyTransfered};
 
   async function fixture(_wallets: Wallet[], _mockProvider: MockProvider) {
     const LotteryMaker = await ethers.getContractFactory("LotteryMaker");
@@ -64,15 +64,15 @@ describe("LotteryMaker", function () {
   });
 
   it("Should stop a lottery from entering", async function () {
-    const {lotteryMaker, feeInWei, owner, user1} = await loadFixture(fixture);    
+    const {lotteryMaker, feeInWei, owner, user2} = await loadFixture(fixture);    
     const feeToPay = feeInWei.add(100);
     const lotteryID = await lotteryMaker.ownerLotteryIDMapping(owner.address);
     await lotteryMaker
-      .connect(user1)
-      .enterLottery(lotteryID, { from: user1.getAddress(), value: feeToPay });
+      .connect(user2)
+      .enterLottery(lotteryID, { from: user2.getAddress(), value: feeToPay });
     
     await expect(lotteryMaker
-      .connect(user1)
+      .connect(user2)
       .stopEntrance(lotteryID)
     ).to.be.reverted;
     
@@ -82,5 +82,14 @@ describe("LotteryMaker", function () {
       
     expect(await lotteryMaker.lotteryIDStateMapping(lotteryID))
       .to.equal(LotteryState.Stopped);
+  });
+
+  it("Should fire calculating a winner", async function () {
+    const {lotteryMaker, feeInWei, owner} = await loadFixture(fixture);
+    const lotteryID = await lotteryMaker.ownerLotteryIDMapping(owner.address);
+    await lotteryMaker.connect(owner).calculateWinner(lotteryID);    
+      
+    expect(await lotteryMaker.lotteryIDStateMapping(lotteryID))
+      .to.equal(LotteryState.Calculating);
   });
 });

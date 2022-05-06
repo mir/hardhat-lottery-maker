@@ -10,7 +10,7 @@ import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
 
 contract LotteryMaker is Ownable, VRFConsumerBaseV2 {
     using Counters for Counters.Counter;
-    enum LotteryState { Open, Stopped, MoneyTransfered }
+    enum LotteryState { Open, Stopped, Calculating, MoneyTransfered }
 
     uint public creatorFee;
     mapping(address => uint) public ownerLotteryIDMapping;
@@ -97,6 +97,7 @@ contract LotteryMaker is Ownable, VRFConsumerBaseV2 {
         require(lotteryIDStateMapping[lotteryID] == LotteryState.Stopped, "Sorry, lottery is not stopped");
         require(lotteryIDEntrancesMapping[lotteryID].length > 0, "No entrances");
         console.log("Random number requested, lotteryID:", lotteryID);
+        lotteryIDStateMapping[lotteryID] = LotteryState.Calculating;
         uint s_requestId = COORDINATOR.requestRandomWords(
             keyHash,
             s_subscriptionId,
@@ -123,7 +124,7 @@ contract LotteryMaker is Ownable, VRFConsumerBaseV2 {
 
     function winnerCalculated(uint lotteryID, address payable winnerAddress) internal {        
         console.log("Calculated winner address: ", winnerAddress);
-        require(lotteryIDStateMapping[lotteryID] == LotteryState.Stopped, "Sorry, lottery is not stopped");
+        require(lotteryIDStateMapping[lotteryID] == LotteryState.Calculating, "Sorry, lottery is not in Calculating state");
         lotteryIDStateMapping[lotteryID] = LotteryState.MoneyTransfered;
         winnerAddress.transfer(lotteryIDBalanceMapping[lotteryID]);
         console.log("Money transfered: ", winnerAddress);
