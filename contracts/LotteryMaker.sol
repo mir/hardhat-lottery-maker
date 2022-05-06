@@ -83,6 +83,9 @@ contract LotteryMaker is Ownable, VRFConsumerBaseV2 {
     }
 
     function stopEntrance(uint lotteryID) external {
+        console.log("Stopping entrance. LotteryID :", lotteryID);
+        console.log("msg.sender:", msg.sender);
+        console.log("ownerLotteryIDMapping[msg.sender]:", ownerLotteryIDMapping[msg.sender]);
         require(ownerLotteryIDMapping[msg.sender] == lotteryID, "Only creator of the Lottery can stop entrance");
         require(lotteryIDStateMapping[lotteryID] == LotteryState.Open, "Sorry, lottery is not open");
         lotteryIDStateMapping[lotteryID] = LotteryState.Stopped;
