@@ -98,7 +98,7 @@ describe("LotteryMaker", function () {
     const lotteryID = await lotteryMaker.ownerLotteryIDMapping(owner.address, 0);
     const oldUser1Balance = await user1.getBalance();
     const oldUser2Balance = await user2.getBalance();
-
+    const oldLotteryIDBalance = await lotteryMaker.lotteryIDBalanceMapping(lotteryID);
     // Fake Chainlink Oracle response as a contract call
     await lotteryMaker
       .connect(owner)
@@ -109,9 +109,16 @@ describe("LotteryMaker", function () {
       .to.equal(LotteryState.MoneyTransfered);
 
     const user1BalanceChange = (await user1.getBalance()).sub(oldUser1Balance);
-    const user2BalanceChange = (await user1.getBalance()).sub(oldUser2Balance);
+    const user2BalanceChange = (await user2.getBalance()).sub(oldUser2Balance);
+    const lotteryIDBalanceDeduction = 
+      oldLotteryIDBalance.sub(
+        await lotteryMaker.lotteryIDBalanceMapping(lotteryID)
+      );      
 
     //Expect somebody to win the lottery and money to be transferred
-    expect(user1BalanceChange.add(user2BalanceChange)).to.gt(BigNumber.from(0));
+    const userBalanceChange = user1BalanceChange.add(user2BalanceChange);
+    expect(userBalanceChange).to.gt(BigNumber.from(0));
+    expect(lotteryIDBalanceDeduction).to.gt(BigNumber.from(0));
+    expect(userBalanceChange).to.equal(lotteryIDBalanceDeduction);
   });
 });

@@ -143,7 +143,11 @@ contract LotteryMaker is Ownable, VRFConsumerBaseV2 {
         console.log("Calculated winner address: ", winnerAddress);
         require(lotteryIDStateMapping[lotteryID] == LotteryState.Calculating, "Sorry, lottery is not in Calculating state");
         lotteryIDStateMapping[lotteryID] = LotteryState.MoneyTransfered;
-        winnerAddress.transfer(lotteryIDBalanceMapping[lotteryID]);
+        uint toTransfer = lotteryIDBalanceMapping[lotteryID];
+        console.log("On the balance: ", toTransfer);
+        console.log("On the contract address balance: ", address(this).balance);
+        lotteryIDBalanceMapping[lotteryID] = 0;
+        winnerAddress.transfer(toTransfer);
         console.log("Money transfered: ", winnerAddress);
         delete lotteryIDEntrancesMapping[lotteryID];
     }
