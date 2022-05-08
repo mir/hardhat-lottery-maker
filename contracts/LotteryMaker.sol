@@ -129,7 +129,8 @@ contract LotteryMaker is Ownable, VRFConsumerBaseV2 {
         uint256 requestID, /* requestId */
         uint256[] memory randomWords
     ) internal override {
-        console.log("Got a random number: ", requestID);
+        console.log("Got a random number. RequestID: ", requestID);
+        console.log("Got a random number. randomWords[0]: ", randomWords[0]);
         uint lotteryID = requestIDLotteryIDMapping[requestID];
         console.log("Convertef requestID to lotteryID: ", lotteryID);
         address payable[] memory entrances = lotteryIDEntrancesMapping[lotteryID];

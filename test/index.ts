@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import {loadFixture} from 'ethereum-waffle';
-import { Wallet} from "ethers";
+import { BigNumber, Wallet} from "ethers";
 import {MockProvider} from "ethereum-waffle";
 import { smock } from '@defi-wonderland/smock';
 
@@ -12,14 +12,15 @@ describe("LotteryMaker", function () {
   async function fixture(_wallets: Wallet[], _mockProvider: MockProvider) {
     const [owner, user1, user2] = await ethers.getSigners();
     const LotteryMaker = await ethers.getContractFactory("LotteryMaker");
-    const coordinatorMock = await smock.fake('VRFCoordinatorV2Interface');
+    const coordinatorMock = await smock.fake('VRFCoordinatorV2Interface', {address: owner.address});
     const lotteryMaker = await LotteryMaker.deploy(0, coordinatorMock.address);
     await lotteryMaker.deployed();        
 
     const feeInWei = ethers.utils.parseEther("0.001");
     await lotteryMaker.connect(owner).createLottery(feeInWei);    
     
-    return { lotteryMaker, feeInWei, owner, user1, user2, coordinatorMock };
+    const requestID = 1234;
+    return { lotteryMaker, feeInWei, owner, user1, user2, coordinatorMock, requestID };
   }
 
   it("Should deploy lottery maker with zero creating fee", async function () {
@@ -83,11 +84,34 @@ describe("LotteryMaker", function () {
   });
 
   it("Should fire calculating a winner", async function () {
-    const {lotteryMaker, owner} = await loadFixture(fixture);    
+    const {lotteryMaker, owner, coordinatorMock, requestID} = await loadFixture(fixture);    
     const lotteryID = await lotteryMaker.ownerLotteryIDMapping(owner.address, 0);
-    await lotteryMaker.connect(owner).calculateWinner(lotteryID);    
-      
+    coordinatorMock.requestRandomWords.returns(requestID);
+    await lotteryMaker.connect(owner).calculateWinner(lotteryID);
+
     expect(await lotteryMaker.lotteryIDStateMapping(lotteryID))
       .to.equal(LotteryState.Calculating);
+  });
+
+  it("Should transfer money and stop the lottery", async function () {
+    const {lotteryMaker, owner, user1, user2, requestID} = await loadFixture(fixture);    
+    const lotteryID = await lotteryMaker.ownerLotteryIDMapping(owner.address, 0);
+    const oldUser1Balance = await user1.getBalance();
+    const oldUser2Balance = await user2.getBalance();
+
+    // Fake Chainlink Oracle response as a contract call
+    await lotteryMaker
+      .connect(owner)
+      .rawFulfillRandomWords(requestID,[10]);
+
+    // Check status of the lottery
+    expect(await lotteryMaker.lotteryIDStateMapping(lotteryID))
+      .to.equal(LotteryState.MoneyTransfered);
+
+    const user1BalanceChange = (await user1.getBalance()).sub(oldUser1Balance);
+    const user2BalanceChange = (await user1.getBalance()).sub(oldUser2Balance);
+
+    //Expect somebody to win the lottery and money to be transferred
+    expect(user1BalanceChange.add(user2BalanceChange)).to.gt(BigNumber.from(0));
   });
 });
