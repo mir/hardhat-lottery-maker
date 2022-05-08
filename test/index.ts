@@ -1,24 +1,25 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import {loadFixture} from 'ethereum-waffle';
-import {BigNumber, Wallet} from "ethers";
+import { Wallet} from "ethers";
 import {MockProvider} from "ethereum-waffle";
+import { smock } from '@defi-wonderland/smock';
 
 describe("LotteryMaker", function () {
 
   enum LotteryState {Open, Stopped, Calculating, MoneyTransfered};
 
   async function fixture(_wallets: Wallet[], _mockProvider: MockProvider) {
+    const [owner, user1, user2] = await ethers.getSigners();
     const LotteryMaker = await ethers.getContractFactory("LotteryMaker");
-    const lotteryMaker = await LotteryMaker.deploy(0);
-    await lotteryMaker.deployed();
-
-    const [owner, user1, user2] = await ethers.getSigners();    
+    const coordinatorMock = await smock.fake('VRFCoordinatorV2Interface');
+    const lotteryMaker = await LotteryMaker.deploy(0, coordinatorMock.address);
+    await lotteryMaker.deployed();        
 
     const feeInWei = ethers.utils.parseEther("0.001");
     await lotteryMaker.connect(owner).createLottery(feeInWei);    
     
-    return { lotteryMaker, feeInWei, owner, user1, user2 };
+    return { lotteryMaker, feeInWei, owner, user1, user2, coordinatorMock };
   }
 
   it("Should deploy lottery maker with zero creating fee", async function () {

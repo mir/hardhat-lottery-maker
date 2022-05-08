@@ -49,8 +49,12 @@ contract LotteryMaker is Ownable, VRFConsumerBaseV2 {
     // Cannot exceed VRFCoordinatorV2.MAX_NUM_WORDS.
     uint32 numWords = 1;
 
-    constructor(uint _creatorFee) VRFConsumerBaseV2(vrfCoordinator){
-        COORDINATOR = VRFCoordinatorV2Interface(vrfCoordinator);
+    constructor(
+        uint _creatorFee,
+        address _vrfCoordinator)
+            VRFConsumerBaseV2(_vrfCoordinator)
+    {
+        COORDINATOR = VRFCoordinatorV2Interface(_vrfCoordinator);
         console.log("Deploying a ContractMaker with minimum fee:", _creatorFee);
         creatorFee = _creatorFee;
     }
