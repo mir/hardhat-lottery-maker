@@ -27,15 +27,12 @@ contract LotteryMaker is Ownable, VRFConsumerBaseV2 {
     VRFCoordinatorV2Interface COORDINATOR;
 
     // Your subscription ID.
-    uint64 s_subscriptionId = 2671;
-    // Rinkeby coordinator. For other networks,
-    // see https://docs.chain.link/docs/vrf-contracts/#configurations
-    address vrfCoordinator = 0x6168499c0cFfCaCD319c818142124B7A15E857ab;
+    uint64 s_subscriptionId;    
 
     // The gas lane to use, which specifies the maximum gas price to bump to.
     // For a list of available gas lanes on each network,
     // see https://docs.chain.link/docs/vrf-contracts/#configurations
-    bytes32 keyHash = 0xd89b2bf150e3b9e13446986e571fb9cab24b13cea0a43ea20a6049a85cc807cc;
+    bytes32 keyHash;
 
     // Depends on the number of requested values that you want sent to the
     // fulfillRandomWords() function. Storing each word costs about 20,000 gas,
@@ -51,12 +48,16 @@ contract LotteryMaker is Ownable, VRFConsumerBaseV2 {
 
     constructor(
         uint _creatorFee,
-        address _vrfCoordinator)
+        address _vrfCoordinator,
+        uint64 _subscriptionId,
+        bytes32 _keyHash)
             VRFConsumerBaseV2(_vrfCoordinator)
     {
         COORDINATOR = VRFCoordinatorV2Interface(_vrfCoordinator);
         console.log("Deploying a ContractMaker with minimum fee:", _creatorFee);
         creatorFee = _creatorFee;
+        s_subscriptionId = _subscriptionId;
+        keyHash = _keyHash;
     }
 
     function changeCreatorFee(uint _newFee) public onlyOwner {
