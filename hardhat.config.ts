@@ -38,6 +38,8 @@ const config: HardhatUserConfig = {
   networks: {
     rinkeby: {
       url: process.env.RINKEBY_URL || "",
+      chainId: 4,
+      saveDeployments: true,
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],      
     },
@@ -49,6 +51,19 @@ const config: HardhatUserConfig = {
   etherscan: {
     apiKey: process.env.ETHERSCAN_API_KEY,
   },
+  verify: { //for hardhat-deploy plugin
+    etherscan: {
+      apiKey: process.env.ETHERSCAN_API_KEY,
+    }
+  },
+  namedAccounts: {
+    deployer: {
+        default: 0, // here this will by default take the first account as deployer      
+    },
+    user1:{
+      default: 1, // here this will by default take the first account as deployer      
+    }
+  },  
 };
 
 export default config;
