@@ -22,7 +22,7 @@ async function latestLotteryID(lotteryMaker: LotteryMaker): Promise<BigNumber> {
   const { getNamedAccounts} = hre;
   const {deployer} = await getNamedAccounts();
   let lastLotteryIndex = 0;
-  let lotteryID = BigNumber.from(1);
+  let lotteryID = BigNumber.from(0);
   try {    
     while(true) {
       lotteryID = await lotteryMaker.ownerLotteryIDMapping(deployer,lastLotteryIndex);
@@ -33,16 +33,22 @@ async function latestLotteryID(lotteryMaker: LotteryMaker): Promise<BigNumber> {
   }  
  }
 
-async function createLottery(lotteryMaker: LotteryMaker) {
+async function createLottery(lotteryMaker: LotteryMaker) {  
   const { getNamedAccounts} = hre;
-  const {deployer} = await getNamedAccounts();
-  await lotteryMaker.createLottery(parseEther("0.001"));
+  const {deployer} = await getNamedAccounts();  
+  console.log("Deployer address:" + deployer); 
+  await lotteryMaker.createLottery(
+    parseEther("0.001"),
+    { from: deployer, value: parseEther("0.001") }
+    );
+  console.log("LotteryMaker is created a lottery");
   const lotteryID = await latestLotteryID(lotteryMaker);
   console.log("Created a lottery with ID: " + lotteryID);
 }
 
 async function main() {  
   const lotteryMaker = await getLotteryMaker();
+  console.log("Got a LotteryMaker: " + lotteryMaker.address);
   await createLottery(lotteryMaker);
 }
 
