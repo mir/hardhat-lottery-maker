@@ -4,6 +4,7 @@ import {loadFixture} from 'ethereum-waffle';
 import { BigNumber, Wallet} from "ethers";
 import {MockProvider} from "ethereum-waffle";
 import { smock } from '@defi-wonderland/smock';
+import { LotteryMaker } from "../typechain-types/contracts/LotteryMaker"
 
 describe("LotteryMaker", function () {
 
@@ -11,19 +12,19 @@ describe("LotteryMaker", function () {
 
   async function fixture(_wallets: Wallet[], _mockProvider: MockProvider) {
     const [owner, user1, user2] = await ethers.getSigners();
-    const LotteryMaker = await ethers.getContractFactory("LotteryMaker");
+    const lotteryMakerFactory = await ethers.getContractFactory("LotteryMaker");
     const coordinatorMock = await smock.fake('VRFCoordinatorV2Interface', {address: owner.address});
     const creatingFee = 0;
     const coordinatorAddress = coordinatorMock.address;
     const subscriptionID = 0;
     const keyHash = ethers.utils.formatBytes32String("keyHash");
-    const lotteryMaker = await LotteryMaker.deploy(
+    const lotteryMaker = await lotteryMakerFactory.deploy(
       creatingFee, //Creating fee
       coordinatorAddress, //VRFCoordinatorV2 address
       subscriptionID,//SubscruptionID uint64
       keyHash
-      );
-    await lotteryMaker.deployed();        
+      ) as LotteryMaker;
+    await lotteryMaker.deployed();           
 
     const feeInWei = ethers.utils.parseEther("0.001");
     await lotteryMaker.connect(owner).createLottery(feeInWei);    
