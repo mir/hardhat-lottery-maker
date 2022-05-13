@@ -3,28 +3,35 @@
 //
 // When running the script with `npx hardhat run <script>` you'll find the Hardhat
 // Runtime Environment's members available in the global scope.
+import { ethers } from "hardhat";
 import hre from "hardhat"
 import { LotteryMaker } from "../typechain-types/contracts/LotteryMaker";
 import {parseEther} from 'ethers/lib/utils';
 import { latestLotteryID, getLotteryMaker, DEFAULT_PAYMENT } from "./fixtures";
+import { BigNumber } from "ethers";
 
-async function createLottery(lotteryMaker: LotteryMaker) {  
+async function enterTheLottery(
+  lotteryMaker: LotteryMaker,
+  lotteryID: BigNumber  
+  ) {  
   const { getNamedAccounts} = hre;
-  const {deployer} = await getNamedAccounts();  
-  console.log("Deployer address:" + deployer); 
-  await lotteryMaker.createLottery(
-    DEFAULT_PAYMENT,
-    { from: deployer, value: DEFAULT_PAYMENT }
+  const {deployer} = await getNamedAccounts();   
+  await lotteryMaker
+    .connect(deployer)
+    .enterLottery(
+      lotteryID,
+      {value: DEFAULT_PAYMENT, from: deployer}
     );
-  console.log("LotteryMaker is created a lottery");
-  const lotteryID = await latestLotteryID(lotteryMaker);
-  console.log("Created a lottery with ID: " + lotteryID);
+  await lotteryMaker
+    .connect(deployer)
+    .stopEntrance(lotteryID);
 }
 
 async function main() {  
-  const lotteryMaker = await getLotteryMaker();
-  console.log("Got a LotteryMaker: " + lotteryMaker.address);
-  await createLottery(lotteryMaker);
+  const lotteryMaker = await getLotteryMaker();  
+  const lotteryID = await latestLotteryID(lotteryMaker);
+  console.log(`Got a lotteryMaker with lotteryID ${lotteryID}`);
+  await enterTheLottery(lotteryMaker, lotteryID);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
