@@ -1,7 +1,7 @@
 import { ethers } from "hardhat";
 import hre from "hardhat";
-import { LotteryMaker } from "../typechain-types/contracts/LotteryMaker";
-import { BigNumber } from "ethers";
+import { LotteryCreatedEventEventFilter, LotteryMaker } from "../typechain-types/contracts/LotteryMaker";
+import { BigNumber, EventFilter, logger, utils } from "ethers";
 import { parseEther } from "ethers/lib/utils";
 
 export const DEFAULT_PAYMENT = parseEther("0.001");
@@ -19,17 +19,22 @@ export async function getLotteryMaker() {
   }  
 }
 
-export async function latestLotteryID(lotteryMaker: LotteryMaker): Promise<BigNumber> {  
+export async function latestLotteryID(lotteryMaker: LotteryMaker): Promise<BigNumber> {      
   const { getNamedAccounts } = hre;
-  const { deployer } = await getNamedAccounts();
-  let lastLotteryIndex = BigNumber.from(0);
-  let lotteryID = BigNumber.from(0);
-  try {
-    while (true) {
-      lotteryID = await lotteryMaker.ownerLotteryIDMapping(deployer, lastLotteryIndex);
-      lastLotteryIndex.add(1);
-    }    
-  } catch (e) {
-    return lastLotteryIndex;
-  }
+   
+  const filter = {
+    address: lotteryMaker.address,
+    topics: [
+      ethers.utils.id("LotteryCreatedEvent(address,uint256)"),
+      null,
+      null
+    ],
+    fromBlock: 0,
+  };
+
+  const logs = await ethers.provider.getLogs(filter);  
+  const latestEvent = logs[logs.length - 1];
+  const latestLotteryID = BigNumber.from(latestEvent.topics[2]);
+
+  return latestLotteryID;
 }

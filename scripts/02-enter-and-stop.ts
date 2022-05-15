@@ -15,13 +15,22 @@ async function enterTheLottery(
   lotteryID: BigNumber  
   ) {  
   const { getNamedAccounts} = hre;
-  const {deployer} = await getNamedAccounts();   
-  await lotteryMaker
+  const deployer = await ethers.getNamedSigner("deployer")
+  if (await lotteryMaker.lotteryIDStateMapping(lotteryID) > 0) {
+    console.log("Already stopped from entering");
+    return;
+  }
+  console.log(`Entering the lottery as a deployer=${deployer.address}`) 
+  const tx = await lotteryMaker
     .connect(deployer)
     .enterLottery(
       lotteryID,
-      {value: DEFAULT_PAYMENT, from: deployer}
+      {value: DEFAULT_PAYMENT, from: deployer.address}
     );
+  console.log("Waiting for transaction...");
+  tx.wait();
+  console.log("Done.")
+  console.log(`Stopping the lottery as a deployer=${deployer.address}`) 
   await lotteryMaker
     .connect(deployer)
     .stopEntrance(lotteryID);
@@ -30,7 +39,7 @@ async function enterTheLottery(
 async function main() {  
   const lotteryMaker = await getLotteryMaker();  
   const lotteryID = await latestLotteryID(lotteryMaker);
-  console.log(`Got a lotteryMaker with lotteryID ${lotteryID}`);
+  console.log(`Got a lotteryMaker with lotteryID=${lotteryID}`);
   await enterTheLottery(lotteryMaker, lotteryID);
 }
 

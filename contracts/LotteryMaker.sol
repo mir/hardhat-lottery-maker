@@ -11,7 +11,7 @@ import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
 contract LotteryMaker is Ownable, VRFConsumerBaseV2 {
     using Counters for Counters.Counter;
     enum LotteryState { Open, Stopped, Calculating, MoneyTransfered }
-    event LotteryCreatedEvent(address owner, uint lotteryID);
+    event LotteryCreatedEvent(address indexed owner, uint indexed lotteryID);
 
     uint public creatorFee;
     mapping(address => uint[]) public ownerLotteryIDMapping;

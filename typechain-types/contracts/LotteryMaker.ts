@@ -504,12 +504,12 @@ export interface LotteryMaker extends BaseContract {
 
   filters: {
     "LotteryCreatedEvent(address,uint256)"(
-      owner?: null,
-      lotteryID?: null
+      owner?: string | null,
+      lotteryID?: BigNumberish | null
     ): LotteryCreatedEventEventFilter;
     LotteryCreatedEvent(
-      owner?: null,
-      lotteryID?: null
+      owner?: string | null,
+      lotteryID?: BigNumberish | null
     ): LotteryCreatedEventEventFilter;
 
     "OwnershipTransferred(address,address)"(
