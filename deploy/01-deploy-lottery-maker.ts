@@ -1,16 +1,17 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {parseEther} from 'ethers/lib/utils';
-import { dotEnvData } from '../scripts/env-manager';
+import { dotEnvData, EnvManager } from '../scripts/env-manager';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     const {deployments, getNamedAccounts} = hre;
     const {deploy} = deployments;
     const { deployer } = await getNamedAccounts();    
 
-    const coordinatorAddress = dotEnvData("VRFCOORDINATORV2",hre.network.name);
-    const keyHash = dotEnvData("keyHash",hre.network.name);
-    const subscriptionID = dotEnvData("subscriptionID",hre.network.name)
+    const envManager = new EnvManager(hre.network.name);
+    const coordinatorAddress = envManager.get("VRFCOORDINATORV2");
+    const keyHash = envManager.get("keyHash");
+    const subscriptionID = envManager.get("subscriptionID")
 
     console.log(subscriptionID)
 
