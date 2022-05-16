@@ -38,9 +38,9 @@ export interface LotteryMakerInterface extends utils.Interface {
     "lotteryIDDurationMapping(uint256)": FunctionFragment;
     "lotteryIDEntrancesMapping(uint256,uint256)": FunctionFragment;
     "lotteryIDFeeMapping(uint256)": FunctionFragment;
+    "lotteryIDOwnerMapping(uint256)": FunctionFragment;
     "lotteryIDStateMapping(uint256)": FunctionFragment;
     "owner()": FunctionFragment;
-    "ownerLotteryIDMapping(address,uint256)": FunctionFragment;
     "rawFulfillRandomWords(uint256,uint256[])": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
     "requestIDLotteryIDMapping(uint256)": FunctionFragment;
@@ -59,9 +59,9 @@ export interface LotteryMakerInterface extends utils.Interface {
       | "lotteryIDDurationMapping"
       | "lotteryIDEntrancesMapping"
       | "lotteryIDFeeMapping"
+      | "lotteryIDOwnerMapping"
       | "lotteryIDStateMapping"
       | "owner"
-      | "ownerLotteryIDMapping"
       | "rawFulfillRandomWords"
       | "renounceOwnership"
       | "requestIDLotteryIDMapping"
@@ -106,14 +106,14 @@ export interface LotteryMakerInterface extends utils.Interface {
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
+    functionFragment: "lotteryIDOwnerMapping",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
     functionFragment: "lotteryIDStateMapping",
     values: [BigNumberish]
   ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
-  encodeFunctionData(
-    functionFragment: "ownerLotteryIDMapping",
-    values: [string, BigNumberish]
-  ): string;
   encodeFunctionData(
     functionFragment: "rawFulfillRandomWords",
     values: [BigNumberish, BigNumberish[]]
@@ -169,14 +169,14 @@ export interface LotteryMakerInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "lotteryIDOwnerMapping",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "lotteryIDStateMapping",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "ownerLotteryIDMapping",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(
     functionFragment: "rawFulfillRandomWords",
     data: BytesLike
@@ -301,18 +301,17 @@ export interface LotteryMaker extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
+    lotteryIDOwnerMapping(
+      arg0: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[string]>;
+
     lotteryIDStateMapping(
       arg0: BigNumberish,
       overrides?: CallOverrides
     ): Promise<[number]>;
 
     owner(overrides?: CallOverrides): Promise<[string]>;
-
-    ownerLotteryIDMapping(
-      arg0: string,
-      arg1: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<[BigNumber]>;
 
     rawFulfillRandomWords(
       requestId: BigNumberish,
@@ -383,18 +382,17 @@ export interface LotteryMaker extends BaseContract {
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
+  lotteryIDOwnerMapping(
+    arg0: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<string>;
+
   lotteryIDStateMapping(
     arg0: BigNumberish,
     overrides?: CallOverrides
   ): Promise<number>;
 
   owner(overrides?: CallOverrides): Promise<string>;
-
-  ownerLotteryIDMapping(
-    arg0: string,
-    arg1: BigNumberish,
-    overrides?: CallOverrides
-  ): Promise<BigNumber>;
 
   rawFulfillRandomWords(
     requestId: BigNumberish,
@@ -465,18 +463,17 @@ export interface LotteryMaker extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    lotteryIDOwnerMapping(
+      arg0: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<string>;
+
     lotteryIDStateMapping(
       arg0: BigNumberish,
       overrides?: CallOverrides
     ): Promise<number>;
 
     owner(overrides?: CallOverrides): Promise<string>;
-
-    ownerLotteryIDMapping(
-      arg0: string,
-      arg1: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
 
     rawFulfillRandomWords(
       requestId: BigNumberish,
@@ -566,18 +563,17 @@ export interface LotteryMaker extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    lotteryIDOwnerMapping(
+      arg0: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     lotteryIDStateMapping(
       arg0: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     owner(overrides?: CallOverrides): Promise<BigNumber>;
-
-    ownerLotteryIDMapping(
-      arg0: string,
-      arg1: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<BigNumber>;
 
     rawFulfillRandomWords(
       requestId: BigNumberish,
@@ -649,18 +645,17 @@ export interface LotteryMaker extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
+    lotteryIDOwnerMapping(
+      arg0: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     lotteryIDStateMapping(
       arg0: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    ownerLotteryIDMapping(
-      arg0: string,
-      arg1: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
 
     rawFulfillRandomWords(
       requestId: BigNumberish,

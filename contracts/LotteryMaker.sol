@@ -13,8 +13,8 @@ contract LotteryMaker is Ownable, VRFConsumerBaseV2 {
     enum LotteryState { Open, Stopped, Calculating, MoneyTransfered }
     event LotteryCreatedEvent(address indexed owner, uint indexed lotteryID);
 
-    uint public creatorFee;
-    mapping(address => uint[]) public ownerLotteryIDMapping;
+    uint public creatorFee;    
+    mapping(uint => address) public lotteryIDOwnerMapping;
     mapping(uint => uint) public lotteryIDFeeMapping;
     mapping(uint => uint) public lotteryIDDurationMapping;
     mapping(uint => LotteryState) public lotteryIDStateMapping;
@@ -73,11 +73,11 @@ contract LotteryMaker is Ownable, VRFConsumerBaseV2 {
         // console.log("   Create a lottery with fee: ", entranceFee);
         lotteryIDCounter.increment();
         uint lotteryID = lotteryIDCounter.current();        
-        // console.log("   LotteryID: ", lotteryID);
-        ownerLotteryIDMapping[msg.sender].push(lotteryID);
+        // console.log("   LotteryID: ", lotteryID);        
         lotteryIDFeeMapping[lotteryID] = entranceFee;
         lotteryIDStateMapping[lotteryID] = LotteryState.Open;
         lotteryIDBalanceMapping[lotteryID] = 0;
+        lotteryIDOwnerMapping[lotteryID] = msg.sender;
         emit LotteryCreatedEvent(msg.sender, lotteryID);
     }
 
@@ -91,16 +91,8 @@ contract LotteryMaker is Ownable, VRFConsumerBaseV2 {
         lotteryIDEntrancesMapping[lotteryID].push(payable(msg.sender));
     }
 
-    function isOwner(uint lotteryID) internal view returns(bool) {
-        uint[] memory lotteryIDArray = ownerLotteryIDMapping[msg.sender];
-        bool answer = false;
-        for (uint i=0; i<lotteryIDArray.length; i++) {
-            if(lotteryIDArray[i] == lotteryID) {
-                answer = true;
-                break;
-            }
-        }
-        return answer;
+    function isOwner(uint lotteryID) internal view returns(bool) {        
+        return msg.sender == lotteryIDOwnerMapping[lotteryID];
     }
 
     function stopEntrance(uint lotteryID) external {

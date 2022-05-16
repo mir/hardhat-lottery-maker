@@ -26,7 +26,7 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
 
 const config: HardhatUserConfig = {  
   solidity: {
-    version: '0.8.4',
+    version: '0.8.13',
     settings: {
       outputSelection: {
         "*": {
@@ -41,7 +41,9 @@ const config: HardhatUserConfig = {
       chainId: 4,
       saveDeployments: true,
       accounts:
-        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],      
+        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+      gasMultiplier: 10,
+      loggingEnabled: true,
     },
   },
   gasReporter: {

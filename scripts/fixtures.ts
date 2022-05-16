@@ -5,6 +5,7 @@ import { BigNumber, EventFilter, logger, utils } from "ethers";
 import { parseEther } from "ethers/lib/utils";
 
 export const DEFAULT_PAYMENT = parseEther("0.001");
+export enum LotteryState {Open, Stopped, Calculating, MoneyTransfered};
 
 export async function getLotteryMaker() {
   const { deployments } = hre;

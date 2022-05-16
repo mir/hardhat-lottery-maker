@@ -6,8 +6,7 @@
 import { ethers } from "hardhat";
 import hre from "hardhat"
 import { LotteryMaker } from "../typechain-types/contracts/LotteryMaker";
-import {parseEther} from 'ethers/lib/utils';
-import { latestLotteryID, getLotteryMaker, DEFAULT_PAYMENT } from "./fixtures";
+import { latestLotteryID, getLotteryMaker, DEFAULT_PAYMENT, LotteryState } from "./fixtures";
 import { BigNumber } from "ethers";
 
 async function enterTheLottery(
@@ -16,24 +15,26 @@ async function enterTheLottery(
   ) {  
   const { getNamedAccounts} = hre;
   const deployer = await ethers.getNamedSigner("deployer")
-  if (await lotteryMaker.lotteryIDStateMapping(lotteryID) > 0) {
+  if (await lotteryMaker.lotteryIDStateMapping(lotteryID) > LotteryState.Open) {
     console.log("Already stopped from entering");
     return;
   }
   console.log(`Entering the lottery as a deployer=${deployer.address}`) 
-  const tx = await lotteryMaker
+  const tx1 = await lotteryMaker
     .connect(deployer)
     .enterLottery(
       lotteryID,
       {value: DEFAULT_PAYMENT, from: deployer.address}
     );
-  console.log("Waiting for transaction...");
-  tx.wait();
+  console.log("Waiting for transaction..." + tx1.hash);
+  tx1.wait(1);  
   console.log("Done.")
   console.log(`Stopping the lottery as a deployer=${deployer.address}`) 
-  await lotteryMaker
+  const tx2 = await lotteryMaker
     .connect(deployer)
     .stopEntrance(lotteryID);
+  console.log("Waiting for transaction..." + tx2.hash);
+  tx2.wait(1);
 }
 
 async function main() {  

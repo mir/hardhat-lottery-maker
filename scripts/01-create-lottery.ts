@@ -8,15 +8,25 @@ import { LotteryMaker } from "../typechain-types/contracts/LotteryMaker";
 import {parseEther} from 'ethers/lib/utils';
 import { latestLotteryID, getLotteryMaker, DEFAULT_PAYMENT } from "./fixtures";
 
-async function createLottery(lotteryMaker: LotteryMaker) {  
+async function createLottery(lotteryMaker: LotteryMaker, skipIfExists=true) {  
+  try {
+    const lotteryID = await latestLotteryID(lotteryMaker);
+    if (skipIfExists) {
+      console.log("Lottery is already exists with ID = " + lotteryID);
+      return;
+    }    
+  } catch(e) {
+    console.log("Creating new lottery.")    
+  }
   const { getNamedAccounts} = hre;
   const {deployer} = await getNamedAccounts();  
   console.log("Deployer address:" + deployer); 
-  await lotteryMaker.createLottery(
+  const tx = await lotteryMaker.createLottery(
     DEFAULT_PAYMENT,
     { from: deployer, value: DEFAULT_PAYMENT }
-    );
-  console.log("LotteryMaker is created a lottery");
+    );    
+  tx.wait(1);
+  console.log(`LotteryMaker is created a lottery with tx=${tx.hash}`);
   const lotteryID = await latestLotteryID(lotteryMaker);
   console.log("Created a lottery with ID: " + lotteryID);
 }

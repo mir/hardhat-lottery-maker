@@ -5,6 +5,7 @@ import { BigNumber, Wallet} from "ethers";
 import {MockProvider} from "ethereum-waffle";
 import { smock } from '@defi-wonderland/smock';
 import { LotteryMaker } from "../typechain-types/contracts/LotteryMaker"
+import { latestLotteryID } from "../scripts/fixtures";
 
 describe("LotteryMaker", function () {
 
@@ -39,9 +40,9 @@ describe("LotteryMaker", function () {
   });
 
   it("Should create a lottery with 0.001 wei entrance fee", async function () {
-    const {lotteryMaker, feeInWei, owner} = await loadFixture(fixture);
+    const {lotteryMaker, feeInWei} = await loadFixture(fixture);
             
-    const lotteryID = await lotteryMaker.ownerLotteryIDMapping(owner.address, 0);
+    const lotteryID = await latestLotteryID(lotteryMaker);
     const fee = await lotteryMaker.lotteryIDFeeMapping(lotteryID);    
     expect(fee).to.equal(feeInWei);
   });
@@ -50,7 +51,7 @@ describe("LotteryMaker", function () {
     const {lotteryMaker, feeInWei, owner, user1} = await loadFixture(fixture);
 
     const feeToPay = feeInWei.add(100);
-    const lotteryID = await lotteryMaker.ownerLotteryIDMapping(owner.address, 0);
+    const lotteryID = await latestLotteryID(lotteryMaker);
     await lotteryMaker
       .connect(user1)
       .enterLottery(
@@ -65,7 +66,7 @@ describe("LotteryMaker", function () {
     const {lotteryMaker, feeInWei, owner, user1} = await loadFixture(fixture);    
         
     const feeToFail = feeInWei.sub(100);
-    const lotteryID = await lotteryMaker.ownerLotteryIDMapping(owner.address, 0);
+    const lotteryID = await latestLotteryID(lotteryMaker);
     await expect(lotteryMaker
       .connect(user1)
       .enterLottery(lotteryID, { from: user1.getAddress(), value: feeToFail })
@@ -75,7 +76,7 @@ describe("LotteryMaker", function () {
   it("Should stop a lottery from entering", async function () {
     const {lotteryMaker, feeInWei, owner, user2} = await loadFixture(fixture);    
     const feeToPay = feeInWei.add(100);
-    const lotteryID = await lotteryMaker.ownerLotteryIDMapping(owner.address, 0);
+    const lotteryID = await latestLotteryID(lotteryMaker);
     await lotteryMaker
       .connect(user2)
       .enterLottery(lotteryID, { from: user2.getAddress(), value: feeToPay });
@@ -95,7 +96,7 @@ describe("LotteryMaker", function () {
 
   it("Should fire calculating a winner", async function () {
     const {lotteryMaker, owner, coordinatorMock, requestID} = await loadFixture(fixture);    
-    const lotteryID = await lotteryMaker.ownerLotteryIDMapping(owner.address, 0);
+    const lotteryID = await latestLotteryID(lotteryMaker);
     coordinatorMock.requestRandomWords.returns(requestID);
     await lotteryMaker.connect(owner).calculateWinner(lotteryID);
 
@@ -105,7 +106,7 @@ describe("LotteryMaker", function () {
 
   it("Should transfer money and stop the lottery", async function () {
     const {lotteryMaker, owner, user1, user2, requestID} = await loadFixture(fixture);    
-    const lotteryID = await lotteryMaker.ownerLotteryIDMapping(owner.address, 0);
+    const lotteryID = await latestLotteryID(lotteryMaker);
     const oldUser1Balance = await user1.getBalance();
     const oldUser2Balance = await user2.getBalance();
     const oldLotteryIDBalance = await lotteryMaker.lotteryIDBalanceMapping(lotteryID);
