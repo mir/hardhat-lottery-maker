@@ -45,6 +45,15 @@ const config: HardhatUserConfig = {
       gasMultiplier: 10,
       loggingEnabled: true,
     },
+    fork: {
+      url: process.env.MAINNET_FORK_URL || "",
+      chainId: 4,
+      saveDeployments: true,
+      accounts:
+        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+      gasMultiplier: 10,
+      loggingEnabled: true,
+    }
   },
   gasReporter: {
     enabled: process.env.REPORT_GAS !== undefined,

@@ -25,7 +25,7 @@ async function createLottery(lotteryMaker: LotteryMaker, skipIfExists=true) {
     DEFAULT_PAYMENT,
     { from: deployer, value: DEFAULT_PAYMENT }
     );    
-  tx.wait(1);
+  await tx.wait(1);
   console.log(`LotteryMaker is created a lottery with tx=${tx.hash}`);
   const lotteryID = await latestLotteryID(lotteryMaker);
   console.log("Created a lottery with ID: " + lotteryID);

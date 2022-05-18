@@ -12,6 +12,7 @@ contract LotteryMaker is Ownable, VRFConsumerBaseV2 {
     using Counters for Counters.Counter;
     enum LotteryState { Open, Stopped, Calculating, MoneyTransfered }
     event LotteryCreatedEvent(address indexed owner, uint indexed lotteryID);
+    event WinnerCalculatedEvent(address indexed winner, uint indexed lotteryID);
 
     uint public creatorFee;    
     mapping(uint => address) public lotteryIDOwnerMapping;
@@ -54,26 +55,21 @@ contract LotteryMaker is Ownable, VRFConsumerBaseV2 {
             VRFConsumerBaseV2(_vrfCoordinator)
     {
         COORDINATOR = VRFCoordinatorV2Interface(_vrfCoordinator);
-        // console.log("Deploying a ContractMaker with minimum fee:", _creatorFee);
         creatorFee = _creatorFee;
         s_subscriptionId = _subscriptionId;
         keyHash = _keyHash;
     }
 
     function changeCreatorFee(uint _newFee) public onlyOwner {
-        // console.log("Change fee to new value:", _newFee);
         creatorFee = _newFee;
     }
 
     function createLottery(uint entranceFee)
         external payable 
     {
-        // console.log("createLottery(entranceFee=", entranceFee, ")");
         require(msg.value >= creatorFee, "Not enough ETH to create a lottery");
-        // console.log("   Create a lottery with fee: ", entranceFee);
         lotteryIDCounter.increment();
         uint lotteryID = lotteryIDCounter.current();        
-        // console.log("   LotteryID: ", lotteryID);        
         lotteryIDFeeMapping[lotteryID] = entranceFee;
         lotteryIDStateMapping[lotteryID] = LotteryState.Open;
         lotteryIDBalanceMapping[lotteryID] = 0;
@@ -82,35 +78,22 @@ contract LotteryMaker is Ownable, VRFConsumerBaseV2 {
     }
 
     function enterLottery(uint lotteryID) external payable {
-        // console.log("enterLottery(lotteryID=", lotteryID, ")");
-        // console.log("   Somebody tryed to enter the lottery: ", lotteryID);
         require(lotteryIDStateMapping[lotteryID] == LotteryState.Open, "Sorry, lottery is not open");
         require(msg.value >= lotteryIDFeeMapping[lotteryID], "Not enough ETH to enter the lottery");
-        // console.log("   Somebody entered the lottery and payed ", msg.value);
         lotteryIDBalanceMapping[lotteryID] = lotteryIDBalanceMapping[lotteryID] + msg.value;
         lotteryIDEntrancesMapping[lotteryID].push(payable(msg.sender));
     }
 
-    function isOwner(uint lotteryID) internal view returns(bool) {        
-        return msg.sender == lotteryIDOwnerMapping[lotteryID];
-    }
-
     function stopEntrance(uint lotteryID) external {
-        // console.log("stopEntrance(lotteryID=", lotteryID, ")");
-        // console.log("   Stopping entrance. LotteryID :", lotteryID);
-        // console.log("   msg.sender:", msg.sender);        
-        require(isOwner(lotteryID), "Only creator of the lottery can stop the entrances");
+        require(msg.sender == lotteryIDOwnerMapping[lotteryID], "Only creator of the lottery can stop the entrances");
         require(lotteryIDStateMapping[lotteryID] == LotteryState.Open, "Sorry, lottery is not open");
         lotteryIDStateMapping[lotteryID] = LotteryState.Stopped;
-        // console.log("   Lottery stopped ", lotteryID);
     }
 
     function calculateWinner(uint lotteryID) external {
-        // console.log("calculateWinner(lotteryID=", lotteryID, ")");
-        require(isOwner(lotteryID), "Only creator of the Lottery can calculate winners");
+        require(msg.sender == lotteryIDOwnerMapping[lotteryID], "Only creator of the Lottery can calculate winners");
         require(lotteryIDStateMapping[lotteryID] == LotteryState.Stopped, "Sorry, lottery is not stopped");
         require(lotteryIDEntrancesMapping[lotteryID].length > 0, "No entrances");
-        // console.log("   Random number requested, lotteryID:", lotteryID);
         lotteryIDStateMapping[lotteryID] = LotteryState.Calculating;
         uint s_requestId = COORDINATOR.requestRandomWords(
             keyHash,
@@ -120,35 +103,25 @@ contract LotteryMaker is Ownable, VRFConsumerBaseV2 {
             numWords
         );
         requestIDLotteryIDMapping[s_requestId] = lotteryID;
-        // console.log("   Random number requested, requestID: ", s_requestId);
     }
 
     function fulfillRandomWords(
         uint256 requestID, /* requestId */
         uint256[] memory randomWords
     ) internal override {
-        // console.log("fulfillRandomWords(requestID=", requestID, ",randomWords=..)");
-        // console.log("   Got a random number. RequestID: ", requestID);
-        // console.log("   Got a random number. randomWords[0]: ", randomWords[0]);
         uint lotteryID = requestIDLotteryIDMapping[requestID];
-        // console.log("   Convertef requestID to lotteryID: ", lotteryID);
         address payable[] memory entrances = lotteryIDEntrancesMapping[lotteryID];
         uint winnerNumber = randomWords[0] % entrances.length;
-        // console.log("   Calculated winner number: ", winnerNumber);
         winnerCalculated(lotteryID, entrances[winnerNumber]);
     }
 
     function winnerCalculated(uint lotteryID, address payable winnerAddress) internal {        
-        // console.log("winnerCalculated(lotteryID=", lotteryID, ",winnerAddress=..)");
-        // console.log("   Calculated winner address: ", winnerAddress);
         require(lotteryIDStateMapping[lotteryID] == LotteryState.Calculating, "Sorry, lottery is not in Calculating state");
         lotteryIDStateMapping[lotteryID] = LotteryState.MoneyTransfered;
         uint toTransfer = lotteryIDBalanceMapping[lotteryID];
-        // console.log("   On the balance: ", toTransfer);
-        // console.log("   On the contract address balance: ", address(this).balance);
         lotteryIDBalanceMapping[lotteryID] = 0;
         winnerAddress.transfer(toTransfer);
-        // console.log("   Money transfered: ", winnerAddress);
         delete lotteryIDEntrancesMapping[lotteryID];
+        emit WinnerCalculatedEvent(winnerAddress, lotteryID);
     }
 }

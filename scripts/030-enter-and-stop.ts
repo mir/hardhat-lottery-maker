@@ -27,14 +27,15 @@ async function enterTheLottery(
       {value: DEFAULT_PAYMENT, from: deployer.address}
     );
   console.log("Waiting for transaction..." + tx1.hash);
-  tx1.wait(1);  
+  await tx1.wait(1);  
   console.log("Done.")
   console.log(`Stopping the lottery as a deployer=${deployer.address}`) 
   const tx2 = await lotteryMaker
     .connect(deployer)
     .stopEntrance(lotteryID);
   console.log("Waiting for transaction..." + tx2.hash);
-  tx2.wait(1);
+  await tx2.wait(1);
+  console.log("Done");
 }
 
 async function main() {  

@@ -201,10 +201,12 @@ export interface LotteryMakerInterface extends utils.Interface {
   events: {
     "LotteryCreatedEvent(address,uint256)": EventFragment;
     "OwnershipTransferred(address,address)": EventFragment;
+    "WinnerCalculatedEvent(address,uint256)": EventFragment;
   };
 
   getEvent(nameOrSignatureOrTopic: "LotteryCreatedEvent"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "WinnerCalculatedEvent"): EventFragment;
 }
 
 export interface LotteryCreatedEventEventObject {
@@ -230,6 +232,18 @@ export type OwnershipTransferredEvent = TypedEvent<
 
 export type OwnershipTransferredEventFilter =
   TypedEventFilter<OwnershipTransferredEvent>;
+
+export interface WinnerCalculatedEventEventObject {
+  winner: string;
+  lotteryID: BigNumber;
+}
+export type WinnerCalculatedEventEvent = TypedEvent<
+  [string, BigNumber],
+  WinnerCalculatedEventEventObject
+>;
+
+export type WinnerCalculatedEventEventFilter =
+  TypedEventFilter<WinnerCalculatedEventEvent>;
 
 export interface LotteryMaker extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
@@ -517,6 +531,15 @@ export interface LotteryMaker extends BaseContract {
       previousOwner?: string | null,
       newOwner?: string | null
     ): OwnershipTransferredEventFilter;
+
+    "WinnerCalculatedEvent(address,uint256)"(
+      winner?: string | null,
+      lotteryID?: BigNumberish | null
+    ): WinnerCalculatedEventEventFilter;
+    WinnerCalculatedEvent(
+      winner?: string | null,
+      lotteryID?: BigNumberish | null
+    ): WinnerCalculatedEventEventFilter;
   };
 
   estimateGas: {
