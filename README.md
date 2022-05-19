@@ -14,12 +14,14 @@ npx hardhat test
 0. Create Chainlink VRF subscription https://vrf.chain.link/rinkeby
 
 1. Add .env file:
+```shell
 ETHERSCAN_API_KEY=
 RINKEBY_URL=
 PRIVATE_KEY=
 RINKEBY_VRFCOORDINATORV2=0x6168499c0cFfCaCD319c818142124B7A15E857ab
 RINKEBY_KEYHASH=0xd89b2bf150e3b9e13446986e571fb9cab24b13cea0a43ea20a6049a85cc807cc
 RINKEBY_SUBSCRIPTIONID=
+```
 
 2. Deploy contract
 
