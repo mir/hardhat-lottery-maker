@@ -6,9 +6,9 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
+import "@chainlink/contracts/src/v0.8/KeeperCompatible.sol";
 
-
-contract LotteryMaker is Ownable, VRFConsumerBaseV2 {
+contract LotteryMaker is Ownable, VRFConsumerBaseV2, KeeperCompatibleInterface {
     using Counters for Counters.Counter;
     enum LotteryState { Open, Stopped, Calculating, MoneyTransfered }
     event LotteryCreatedEvent(address indexed owner, uint indexed lotteryID);
@@ -17,7 +17,8 @@ contract LotteryMaker is Ownable, VRFConsumerBaseV2 {
     uint public creatorFee;    
     mapping(uint => address) public lotteryIDOwnerMapping;
     mapping(uint => uint) public lotteryIDFeeMapping;
-    mapping(uint => uint) public lotteryIDDurationMapping;
+    mapping(uint => uint) public lotteryIDEndtimeMapping;
+    uint[] public lotteryIDToCheckDuration;
     mapping(uint => LotteryState) public lotteryIDStateMapping;
     mapping(uint => uint) public lotteryIDBalanceMapping;
     mapping(uint => uint) public requestIDLotteryIDMapping;
@@ -64,10 +65,9 @@ contract LotteryMaker is Ownable, VRFConsumerBaseV2 {
         creatorFee = _newFee;
     }
 
-    function createLottery(uint entranceFee)
-        external payable 
+    function createLotteryInternal(uint entranceFee)
+        internal returns(uint)
     {
-        require(msg.value >= creatorFee, "Not enough ETH to create a lottery");
         lotteryIDCounter.increment();
         uint lotteryID = lotteryIDCounter.current();        
         lotteryIDFeeMapping[lotteryID] = entranceFee;
@@ -75,6 +75,27 @@ contract LotteryMaker is Ownable, VRFConsumerBaseV2 {
         lotteryIDBalanceMapping[lotteryID] = 0;
         lotteryIDOwnerMapping[lotteryID] = msg.sender;
         emit LotteryCreatedEvent(msg.sender, lotteryID);
+        return lotteryID;
+    }
+
+    function createLottery(uint entranceFee)
+        external payable 
+    {
+        require(msg.value >= creatorFee, "Not enough ETH to create a lottery");
+        createLotteryInternal(entranceFee);
+    }
+
+    /* 
+        entranceFee in Wei
+        duration in seconds
+    */
+    function createLimitedLottery(uint entranceFee, uint duration)
+        external payable 
+    {
+        require(msg.value >= creatorFee, "Not enough ETH to create a lottery");        
+        uint lotteryID = createLotteryInternal(entranceFee);
+        lotteryIDEndtimeMapping[lotteryID] = block.timestamp + duration;
+        lotteryIDToCheckDuration.push(lotteryID);
     }
 
     function enterLottery(uint lotteryID) external payable {
@@ -123,5 +144,40 @@ contract LotteryMaker is Ownable, VRFConsumerBaseV2 {
         winnerAddress.transfer(toTransfer);
         delete lotteryIDEntrancesMapping[lotteryID];
         emit WinnerCalculatedEvent(winnerAddress, lotteryID);
+    }
+
+    function checkUpkeep(bytes calldata)
+     external view override 
+     returns (bool upkeepNeeded, bytes memory) 
+    {
+        upkeepNeeded = false;        
+        uint arrayLength = lotteryIDToCheckDuration.length;// totalValue auto init to 0        
+        for (uint i=0; i < arrayLength; i++) {
+            uint lotteryID = lotteryIDToCheckDuration[i];
+            upkeepNeeded = upkeepNeeded || 
+                (lotteryIDEntrancesMapping[lotteryID].length > 0
+                &&
+                lotteryIDEndtimeMapping[lotteryID] < block.timestamp
+                &&
+                lotteryIDStateMapping[lotteryID] == LotteryState.Open);
+            if (upkeepNeeded) {
+                return (true, "");
+            }
+        }
+    }
+
+    function performUpkeep(bytes calldata /* performData */) external override {
+        //We highly recommend revalidating the upkeep in the performUpkeep function
+        uint arrayLength = lotteryIDToCheckDuration.length;// totalValue auto init to 0        
+        for (uint i=0; i < arrayLength; i++) {
+            uint lotteryID = lotteryIDToCheckDuration[i];
+            if (lotteryIDEntrancesMapping[lotteryID].length > 0
+                &&
+                lotteryIDEndtimeMapping[lotteryID] < block.timestamp
+                &&
+                lotteryIDStateMapping[lotteryID] == LotteryState.Open) {
+                lotteryIDStateMapping[lotteryID] = LotteryState.Stopped;
+            }
+        }
     }
 }

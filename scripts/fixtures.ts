@@ -58,6 +58,13 @@ export async function latestLotteryID(lotteryMaker: LotteryMaker): Promise<BigNu
   return latestLotteryID;
 }
 
+export async function logBlockTimeStamp() {
+  const blockNumBefore = await ethers.provider.getBlockNumber();
+  const blockBefore = await ethers.provider.getBlock(blockNumBefore);
+  const timestampBefore = blockBefore.timestamp;
+  console.log(`Block timestamp: ${timestampBefore}`);
+}
+
 export async function latestWinner(lotteryMaker: LotteryMaker): Promise<BigNumber> {      
   const filter = {
     address: lotteryMaker.address,

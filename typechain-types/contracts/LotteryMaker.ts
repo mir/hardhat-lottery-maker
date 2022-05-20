@@ -31,16 +31,20 @@ export interface LotteryMakerInterface extends utils.Interface {
   functions: {
     "calculateWinner(uint256)": FunctionFragment;
     "changeCreatorFee(uint256)": FunctionFragment;
+    "checkUpkeep(bytes)": FunctionFragment;
+    "createLimitedLottery(uint256,uint256)": FunctionFragment;
     "createLottery(uint256)": FunctionFragment;
     "creatorFee()": FunctionFragment;
     "enterLottery(uint256)": FunctionFragment;
     "lotteryIDBalanceMapping(uint256)": FunctionFragment;
-    "lotteryIDDurationMapping(uint256)": FunctionFragment;
+    "lotteryIDEndtimeMapping(uint256)": FunctionFragment;
     "lotteryIDEntrancesMapping(uint256,uint256)": FunctionFragment;
     "lotteryIDFeeMapping(uint256)": FunctionFragment;
     "lotteryIDOwnerMapping(uint256)": FunctionFragment;
     "lotteryIDStateMapping(uint256)": FunctionFragment;
+    "lotteryIDToCheckDuration(uint256)": FunctionFragment;
     "owner()": FunctionFragment;
+    "performUpkeep(bytes)": FunctionFragment;
     "rawFulfillRandomWords(uint256,uint256[])": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
     "requestIDLotteryIDMapping(uint256)": FunctionFragment;
@@ -52,16 +56,20 @@ export interface LotteryMakerInterface extends utils.Interface {
     nameOrSignatureOrTopic:
       | "calculateWinner"
       | "changeCreatorFee"
+      | "checkUpkeep"
+      | "createLimitedLottery"
       | "createLottery"
       | "creatorFee"
       | "enterLottery"
       | "lotteryIDBalanceMapping"
-      | "lotteryIDDurationMapping"
+      | "lotteryIDEndtimeMapping"
       | "lotteryIDEntrancesMapping"
       | "lotteryIDFeeMapping"
       | "lotteryIDOwnerMapping"
       | "lotteryIDStateMapping"
+      | "lotteryIDToCheckDuration"
       | "owner"
+      | "performUpkeep"
       | "rawFulfillRandomWords"
       | "renounceOwnership"
       | "requestIDLotteryIDMapping"
@@ -76,6 +84,14 @@ export interface LotteryMakerInterface extends utils.Interface {
   encodeFunctionData(
     functionFragment: "changeCreatorFee",
     values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "checkUpkeep",
+    values: [BytesLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "createLimitedLottery",
+    values: [BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(
     functionFragment: "createLottery",
@@ -94,7 +110,7 @@ export interface LotteryMakerInterface extends utils.Interface {
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "lotteryIDDurationMapping",
+    functionFragment: "lotteryIDEndtimeMapping",
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
@@ -113,7 +129,15 @@ export interface LotteryMakerInterface extends utils.Interface {
     functionFragment: "lotteryIDStateMapping",
     values: [BigNumberish]
   ): string;
+  encodeFunctionData(
+    functionFragment: "lotteryIDToCheckDuration",
+    values: [BigNumberish]
+  ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "performUpkeep",
+    values: [BytesLike]
+  ): string;
   encodeFunctionData(
     functionFragment: "rawFulfillRandomWords",
     values: [BigNumberish, BigNumberish[]]
@@ -144,6 +168,14 @@ export interface LotteryMakerInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "checkUpkeep",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "createLimitedLottery",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "createLottery",
     data: BytesLike
   ): Result;
@@ -157,7 +189,7 @@ export interface LotteryMakerInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "lotteryIDDurationMapping",
+    functionFragment: "lotteryIDEndtimeMapping",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -176,7 +208,15 @@ export interface LotteryMakerInterface extends utils.Interface {
     functionFragment: "lotteryIDStateMapping",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(
+    functionFragment: "lotteryIDToCheckDuration",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "performUpkeep",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "rawFulfillRandomWords",
     data: BytesLike
@@ -282,6 +322,17 @@ export interface LotteryMaker extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    checkUpkeep(
+      arg0: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<[boolean, string] & { upkeepNeeded: boolean }>;
+
+    createLimitedLottery(
+      entranceFee: BigNumberish,
+      duration: BigNumberish,
+      overrides?: PayableOverrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
     createLottery(
       entranceFee: BigNumberish,
       overrides?: PayableOverrides & { from?: string | Promise<string> }
@@ -299,7 +350,7 @@ export interface LotteryMaker extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
 
-    lotteryIDDurationMapping(
+    lotteryIDEndtimeMapping(
       arg0: BigNumberish,
       overrides?: CallOverrides
     ): Promise<[BigNumber]>;
@@ -325,7 +376,17 @@ export interface LotteryMaker extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[number]>;
 
+    lotteryIDToCheckDuration(
+      arg0: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
+
     owner(overrides?: CallOverrides): Promise<[string]>;
+
+    performUpkeep(
+      arg0: BytesLike,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
 
     rawFulfillRandomWords(
       requestId: BigNumberish,
@@ -363,6 +424,17 @@ export interface LotteryMaker extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  checkUpkeep(
+    arg0: BytesLike,
+    overrides?: CallOverrides
+  ): Promise<[boolean, string] & { upkeepNeeded: boolean }>;
+
+  createLimitedLottery(
+    entranceFee: BigNumberish,
+    duration: BigNumberish,
+    overrides?: PayableOverrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
   createLottery(
     entranceFee: BigNumberish,
     overrides?: PayableOverrides & { from?: string | Promise<string> }
@@ -380,7 +452,7 @@ export interface LotteryMaker extends BaseContract {
     overrides?: CallOverrides
   ): Promise<BigNumber>;
 
-  lotteryIDDurationMapping(
+  lotteryIDEndtimeMapping(
     arg0: BigNumberish,
     overrides?: CallOverrides
   ): Promise<BigNumber>;
@@ -406,7 +478,17 @@ export interface LotteryMaker extends BaseContract {
     overrides?: CallOverrides
   ): Promise<number>;
 
+  lotteryIDToCheckDuration(
+    arg0: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
+
   owner(overrides?: CallOverrides): Promise<string>;
+
+  performUpkeep(
+    arg0: BytesLike,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
 
   rawFulfillRandomWords(
     requestId: BigNumberish,
@@ -444,6 +526,17 @@ export interface LotteryMaker extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    checkUpkeep(
+      arg0: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<[boolean, string] & { upkeepNeeded: boolean }>;
+
+    createLimitedLottery(
+      entranceFee: BigNumberish,
+      duration: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     createLottery(
       entranceFee: BigNumberish,
       overrides?: CallOverrides
@@ -461,7 +554,7 @@ export interface LotteryMaker extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    lotteryIDDurationMapping(
+    lotteryIDEndtimeMapping(
       arg0: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
@@ -487,7 +580,14 @@ export interface LotteryMaker extends BaseContract {
       overrides?: CallOverrides
     ): Promise<number>;
 
+    lotteryIDToCheckDuration(
+      arg0: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     owner(overrides?: CallOverrides): Promise<string>;
+
+    performUpkeep(arg0: BytesLike, overrides?: CallOverrides): Promise<void>;
 
     rawFulfillRandomWords(
       requestId: BigNumberish,
@@ -553,6 +653,14 @@ export interface LotteryMaker extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
+    checkUpkeep(arg0: BytesLike, overrides?: CallOverrides): Promise<BigNumber>;
+
+    createLimitedLottery(
+      entranceFee: BigNumberish,
+      duration: BigNumberish,
+      overrides?: PayableOverrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
     createLottery(
       entranceFee: BigNumberish,
       overrides?: PayableOverrides & { from?: string | Promise<string> }
@@ -570,7 +678,7 @@ export interface LotteryMaker extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    lotteryIDDurationMapping(
+    lotteryIDEndtimeMapping(
       arg0: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
@@ -596,7 +704,17 @@ export interface LotteryMaker extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    lotteryIDToCheckDuration(
+      arg0: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     owner(overrides?: CallOverrides): Promise<BigNumber>;
+
+    performUpkeep(
+      arg0: BytesLike,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
 
     rawFulfillRandomWords(
       requestId: BigNumberish,
@@ -635,6 +753,17 @@ export interface LotteryMaker extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
+    checkUpkeep(
+      arg0: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    createLimitedLottery(
+      entranceFee: BigNumberish,
+      duration: BigNumberish,
+      overrides?: PayableOverrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
     createLottery(
       entranceFee: BigNumberish,
       overrides?: PayableOverrides & { from?: string | Promise<string> }
@@ -652,7 +781,7 @@ export interface LotteryMaker extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    lotteryIDDurationMapping(
+    lotteryIDEndtimeMapping(
       arg0: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
@@ -678,7 +807,17 @@ export interface LotteryMaker extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
+    lotteryIDToCheckDuration(
+      arg0: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    performUpkeep(
+      arg0: BytesLike,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
 
     rawFulfillRandomWords(
       requestId: BigNumberish,

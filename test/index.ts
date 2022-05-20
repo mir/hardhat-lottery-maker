@@ -5,7 +5,7 @@ import { BigNumber, Wallet} from "ethers";
 import {MockProvider} from "ethereum-waffle";
 import { smock } from '@defi-wonderland/smock';
 import { LotteryMaker } from "../typechain-types/contracts/LotteryMaker"
-import { latestLotteryID } from "../scripts/fixtures";
+import { latestLotteryID, logBlockTimeStamp } from "../scripts/fixtures";
 
 describe("LotteryMaker", function () {
 
@@ -45,7 +45,7 @@ describe("LotteryMaker", function () {
     const lotteryID = await latestLotteryID(lotteryMaker);
     const fee = await lotteryMaker.lotteryIDFeeMapping(lotteryID);    
     expect(fee).to.equal(feeInWei);
-  });
+  });  
 
   it("User should enter a lottery", async function () {
     const {lotteryMaker, feeInWei, owner, user1} = await loadFixture(fixture);
@@ -131,5 +131,31 @@ describe("LotteryMaker", function () {
     expect(userBalanceChange).to.gt(BigNumber.from(0));
     expect(lotteryIDBalanceDeduction).to.gt(BigNumber.from(0));
     expect(userBalanceChange).to.equal(lotteryIDBalanceDeduction);
+  });
+
+  it("Should create a limited lottery with some duration", async function () {
+    const {lotteryMaker, feeInWei, owner} = await loadFixture(fixture);        
+    
+    const durationToWait = 100;
+    await lotteryMaker.connect(owner).createLimitedLottery(feeInWei, durationToWait);
+    const lotteryID = await latestLotteryID(lotteryMaker);
+    await lotteryMaker
+      .connect(owner)
+      .enterLottery(
+        lotteryID,
+         { from: owner.getAddress(), value: feeInWei }
+      );
+    const someBytes = ethers.utils.formatBytes32String("test");
+    let {upkeepNeeded} = await lotteryMaker
+      .checkUpkeep(someBytes);
+    expect(upkeepNeeded).to.false;    
+    await ethers.provider.send("evm_increaseTime", [durationToWait+1]);
+    await ethers.provider.send("evm_mine", []);    
+    ({upkeepNeeded} = await lotteryMaker
+      .checkUpkeep(someBytes))
+    expect(upkeepNeeded).to.true;
+    await lotteryMaker.performUpkeep(someBytes);
+    expect(await lotteryMaker.lotteryIDStateMapping(lotteryID))
+      .to.equal(LotteryState.Stopped);
   });
 });
