@@ -35,6 +35,7 @@ npx hardhat --network rinkeby deploy
 npx hardhat --network rinkeby etherscan-verify
 ```
 
+Send 5 LINK tokens to deployed contract and register Chainlink Upkeep https://keepers.chain.link/rinkeby
 
 4. Run scripts on Rinkeby network
 
