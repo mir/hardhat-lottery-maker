@@ -13,7 +13,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     const keyHash = envManager.get("keyHash");
     const subscriptionID = envManager.get("subscriptionID")
 
-    console.log(subscriptionID)
+    console.log(`Deploying with subscriptionID=${subscriptionID}`)
 
     await deploy('LotteryMaker', {
         from: deployer,

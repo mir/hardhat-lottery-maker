@@ -7,6 +7,7 @@ import { ethers } from "hardhat";
 import { LotteryMaker } from "../typechain-types/contracts/LotteryMaker";
 import { latestLotteryID, getLotteryMaker, LotteryState } from "./fixtures";
 import { BigNumber } from "ethers";
+import { logUrl } from "./log-helper";
 
 async function calculateWinner(
   lotteryMaker: LotteryMaker,
@@ -23,7 +24,7 @@ async function calculateWinner(
     .calculateWinner(
       lotteryID,      
     );
-  console.log("Waiting for transaction..." + tx1.hash);
+  console.log("Waiting for transaction..." + logUrl(tx1.hash));
   await tx1.wait(1);  
   console.log("Done.")  
 }

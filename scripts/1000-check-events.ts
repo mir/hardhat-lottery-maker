@@ -1,4 +1,5 @@
 import { latestLotteryID, getLotteryMaker, DEFAULT_PAYMENT, latestWinner } from "./fixtures";
+import { logUrl } from "./log-helper";
 
 async function main() {  
   const lotteryMaker = await getLotteryMaker();    
@@ -10,7 +11,7 @@ async function main() {
   }  
   try {
     const winner = await latestWinner(lotteryMaker);
-    console.log(`Latest winner is ${winner}`);
+    console.log(`Latest winner is ${logUrl(winner)}`);
   } catch (e) {
     console.log(e);
   }

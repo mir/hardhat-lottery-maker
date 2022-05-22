@@ -8,6 +8,7 @@ import hre from "hardhat"
 import { LotteryMaker } from "../typechain-types/contracts/LotteryMaker";
 import { latestLotteryID, getLotteryMaker, DEFAULT_PAYMENT, LotteryState } from "./fixtures";
 import { BigNumber } from "ethers";
+import { logUrl } from "./log-helper";
 
 async function enterTheLottery(
   lotteryMaker: LotteryMaker,
@@ -19,7 +20,7 @@ async function enterTheLottery(
     console.log("Already stopped from entering");
     return;
   }
-  console.log(`Entering the lottery as a deployer=${deployer.address}`) 
+  console.log(`Entering the lottery as a deployer=${logUrl(deployer.address)}`) 
   const tx1 = await lotteryMaker
     .connect(deployer)
     .enterLottery(
@@ -29,11 +30,11 @@ async function enterTheLottery(
   console.log("Waiting for transaction..." + tx1.hash);
   await tx1.wait(1);  
   console.log("Done.")
-  console.log(`Stopping the lottery as a deployer=${deployer.address}`) 
+  console.log(`Stopping the lottery as a deployer=${logUrl(deployer.address)}`) 
   const tx2 = await lotteryMaker
     .connect(deployer)
     .stopEntrance(lotteryID);
-  console.log("Waiting for transaction..." + tx2.hash);
+  console.log("Waiting for transaction..." + logUrl(tx2.hash));
   await tx2.wait(1);
   console.log("Done");
 }

@@ -6,12 +6,13 @@ import { BigNumber, EventFilter, logger, utils } from "ethers";
 import { parseEther } from "ethers/lib/utils";
 import { getContractFactory } from "@nomiclabs/hardhat-ethers/types";
 import { EnvManager } from "./env-manager";
+import { logUrl } from "./log-helper";
 
 export const DEFAULT_PAYMENT = parseEther("0.001");
 export enum LotteryState {Open, Stopped, Calculating, MoneyTransfered};
 
 export async function getVRFCoordinator() {
-  const { deployments, getNamedAccounts } = hre;
+  const { getNamedAccounts } = hre;
   const {deployer} = await getNamedAccounts(); 
   const envs = new EnvManager(hre.network.name);
   const vrfCoordinatorAddress = envs.get("VRFCOORDINATORV2");  
@@ -28,7 +29,7 @@ export async function getLotteryMaker() {
   const { deployments } = hre;
   try {
     const lotteryMakerDeployment = await deployments.get("LotteryMaker");  
-    console.log("LotteryMaker deployed to:", lotteryMakerDeployment.address);
+    console.log("LotteryMaker deployed to:", logUrl(lotteryMakerDeployment.address));
     const lotteryMakerFactory = await ethers.getContractFactory("LotteryMaker");
     const lotteryMaker = lotteryMakerFactory.attach(lotteryMakerDeployment.address) as LotteryMaker;
     return lotteryMaker;
@@ -65,7 +66,7 @@ export async function logBlockTimeStamp() {
   console.log(`Block timestamp: ${timestampBefore}`);
 }
 
-export async function latestWinner(lotteryMaker: LotteryMaker): Promise<BigNumber> {      
+export async function latestWinner(lotteryMaker: LotteryMaker): Promise<string> {      
   const filter = {
     address: lotteryMaker.address,
     topics: [
@@ -80,8 +81,9 @@ export async function latestWinner(lotteryMaker: LotteryMaker): Promise<BigNumbe
   if (logs.length === 0) {
     throw "No winners"
   }
-  const latestEvent = logs[logs.length - 1];
-  const latestLotteryID = BigNumber.from(latestEvent.topics[2]);
+  const latestEvent = logs[logs.length - 1];  
+  const latestWinner = latestEvent.topics[1];  
 
-  return latestLotteryID;
+  // Remove extra zeros from the beginning of the address
+  return "0x" + latestWinner.slice(26);
 }

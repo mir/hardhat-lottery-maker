@@ -7,6 +7,7 @@ import { ethers } from "hardhat";
 import hre from "hardhat"
 import { getLotteryMaker, getVRFCoordinator } from "./fixtures";
 import { dotEnvData } from "./env-manager";
+import { logUrl } from "./log-helper";
 
 async function addConsumerToSubscription(
   lotteryMakerAddress: string
@@ -17,14 +18,14 @@ async function addConsumerToSubscription(
     const tx = await vrfCoordinator.addConsumer(
       subscriptionID,
       lotteryMakerAddress);
-    console.log(`Waiting for transaction tx=${tx.hash}`);
+    console.log(`Waiting for transaction tx=${logUrl(tx.hash)}`);
     await tx.wait(2);
-    console.log(`Added lotteryMaker (${lotteryMakerAddress}) to subscription ${subscriptionID}, tx=${tx.hash}`);
+    console.log(`Added lotteryMaker (${logUrl(lotteryMakerAddress)}) to subscription ${subscriptionID}, tx=${logUrl(tx.hash)}`);
 }
 
 async function main() {  
   const lotteryMaker = await getLotteryMaker();    
-  console.log(`Got a lotteryMaker ${lotteryMaker.address}`);
+  console.log(`Got a lotteryMaker ${logUrl(lotteryMaker.address)}`);
   await addConsumerToSubscription(lotteryMaker.address);
 }
 

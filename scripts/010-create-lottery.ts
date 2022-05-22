@@ -7,6 +7,7 @@ import hre from "hardhat"
 import { LotteryMaker } from "../typechain-types/contracts/LotteryMaker";
 import {parseEther} from 'ethers/lib/utils';
 import { latestLotteryID, getLotteryMaker, DEFAULT_PAYMENT } from "./fixtures";
+import { logUrl } from "./log-helper";
 
 async function createLottery(lotteryMaker: LotteryMaker, skipIfExists=true) {  
   try {
@@ -20,20 +21,20 @@ async function createLottery(lotteryMaker: LotteryMaker, skipIfExists=true) {
   }
   const { getNamedAccounts} = hre;
   const {deployer} = await getNamedAccounts();  
-  console.log("Deployer address:" + deployer); 
+  console.log("Deployer address:" + logUrl(deployer)); 
   const tx = await lotteryMaker.createLottery(
     DEFAULT_PAYMENT,
     { from: deployer, value: DEFAULT_PAYMENT }
     );    
   await tx.wait(1);
-  console.log(`LotteryMaker is created a lottery with tx=${tx.hash}`);
+  console.log(`LotteryMaker is created a lottery with tx=${logUrl(tx.hash)}`);
   const lotteryID = await latestLotteryID(lotteryMaker);
   console.log("Created a lottery with ID: " + lotteryID);
 }
 
 async function main() {  
   const lotteryMaker = await getLotteryMaker();
-  console.log("Got a LotteryMaker: " + lotteryMaker.address);
+  console.log("Got a LotteryMaker: " + logUrl(lotteryMaker.address));
   await createLottery(lotteryMaker);
 }
 
