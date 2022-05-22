@@ -54,8 +54,7 @@ const config: HardhatUserConfig = {
       loggingEnabled: true,
       verify: {
         etherscan: {
-          apiUrl: process.env.POLYGONSCAN_API_URL,
-          apiKey: process.env.POLYGONSCAN_API_KEY,
+          apiUrl: process.env.POLYGONSCAN_API_URL,          
         }
       }
     },
@@ -63,15 +62,7 @@ const config: HardhatUserConfig = {
   gasReporter: {
     enabled: process.env.REPORT_GAS !== undefined,
     currency: "USD",
-  },
-  etherscan: {
-    apiKey: process.env.ETHERSCAN_API_KEY,
-  },
-  verify: { //for hardhat-deploy plugin
-    etherscan: {
-      apiKey: process.env.ETHERSCAN_API_KEY,
-    }
-  },
+  }, 
   namedAccounts: {
     deployer: {
         default: 0, // here this will by default take the first account as deployer      
@@ -80,6 +71,11 @@ const config: HardhatUserConfig = {
       default: 1, // here this will by default take the first account as deployer      
     }
   },  
+  verify: { //for hardhat-deploy plugin
+    etherscan: {
+      apiKey: process.env.ETHERSCAN_API_KEY,
+    }
+  },
 };
 
 export default config;
