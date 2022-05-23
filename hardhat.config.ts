@@ -44,6 +44,11 @@ const config: HardhatUserConfig = {
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
       gasMultiplier: 10,
       loggingEnabled: true,
+      verify: { //for hardhat-deploy plugin
+        etherscan: {
+          apiKey: process.env.ETHERSCAN_APIKEY,
+        }
+      },
     },
     matic: {
       url: process.env.MUMBAI_URL || "https://rpc-mumbai.maticvigil.com",
@@ -54,7 +59,8 @@ const config: HardhatUserConfig = {
       loggingEnabled: true,
       verify: {
         etherscan: {
-          apiUrl: process.env.POLYGONSCAN_API_URL,          
+          apiUrl: process.env.POLYGONSCAN_API_URL,   
+          apiKey: process.env.POLYGONSCAN_API_KEY,       
         }
       }
     },
@@ -71,11 +77,6 @@ const config: HardhatUserConfig = {
       default: 1, // here this will by default take the first account as deployer      
     }
   },  
-  verify: { //for hardhat-deploy plugin
-    etherscan: {
-      apiKey: process.env.ETHERSCAN_API_KEY,
-    }
-  },
 };
 
 export default config;
