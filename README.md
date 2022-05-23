@@ -17,7 +17,7 @@ https://vrf.chain.link/mumbai/
 
 1. Add .env file:
 ```shell
-ETHERSCAN_API_KEY=
+ETHERSCAN_APIKEY=
 RINKEBY_URL=
 PRIVATE_KEY=
 RINKEBY_VRFCOORDINATORV2=0x6168499c0cFfCaCD319c818142124B7A15E857ab
@@ -48,7 +48,7 @@ npx hardhat --network rinkeby etherscan-verify
 ```
 
 ```shell
-npx hardhat --network matic etherscan-verify --api-key <API_KEY>
+npx hardhat --network matic etherscan-verify
 ```
 
 Send 5 LINK tokens to deployed contract and register Chainlink Upkeep https://keepers.chain.link/rinkeby
