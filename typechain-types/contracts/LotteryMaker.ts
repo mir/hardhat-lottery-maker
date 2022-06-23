@@ -36,6 +36,7 @@ export interface LotteryMakerInterface extends utils.Interface {
     "createLottery(uint256)": FunctionFragment;
     "creatorFee()": FunctionFragment;
     "enterLottery(uint256)": FunctionFragment;
+    "getAllEntrances(uint256)": FunctionFragment;
     "lotteryIDBalanceMapping(uint256)": FunctionFragment;
     "lotteryIDEndtimeMapping(uint256)": FunctionFragment;
     "lotteryIDEntrancesMapping(uint256,uint256)": FunctionFragment;
@@ -61,6 +62,7 @@ export interface LotteryMakerInterface extends utils.Interface {
       | "createLottery"
       | "creatorFee"
       | "enterLottery"
+      | "getAllEntrances"
       | "lotteryIDBalanceMapping"
       | "lotteryIDEndtimeMapping"
       | "lotteryIDEntrancesMapping"
@@ -103,6 +105,10 @@ export interface LotteryMakerInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "enterLottery",
+    values: [BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getAllEntrances",
     values: [BigNumberish]
   ): string;
   encodeFunctionData(
@@ -182,6 +188,10 @@ export interface LotteryMakerInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "creatorFee", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "enterLottery",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getAllEntrances",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -345,6 +355,11 @@ export interface LotteryMaker extends BaseContract {
       overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    getAllEntrances(
+      lotteryID: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[string[]]>;
+
     lotteryIDBalanceMapping(
       arg0: BigNumberish,
       overrides?: CallOverrides
@@ -447,6 +462,11 @@ export interface LotteryMaker extends BaseContract {
     overrides?: PayableOverrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  getAllEntrances(
+    lotteryID: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<string[]>;
+
   lotteryIDBalanceMapping(
     arg0: BigNumberish,
     overrides?: CallOverrides
@@ -548,6 +568,11 @@ export interface LotteryMaker extends BaseContract {
       lotteryID: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
+
+    getAllEntrances(
+      lotteryID: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<string[]>;
 
     lotteryIDBalanceMapping(
       arg0: BigNumberish,
@@ -673,6 +698,11 @@ export interface LotteryMaker extends BaseContract {
       overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
+    getAllEntrances(
+      lotteryID: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     lotteryIDBalanceMapping(
       arg0: BigNumberish,
       overrides?: CallOverrides
@@ -774,6 +804,11 @@ export interface LotteryMaker extends BaseContract {
     enterLottery(
       lotteryID: BigNumberish,
       overrides?: PayableOverrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    getAllEntrances(
+      lotteryID: BigNumberish,
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     lotteryIDBalanceMapping(

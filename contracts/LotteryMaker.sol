@@ -61,6 +61,10 @@ contract LotteryMaker is Ownable, VRFConsumerBaseV2, KeeperCompatibleInterface {
         keyHash = _keyHash;
     }
 
+    function getAllEntrances(uint lotteryID) public view returns (address payable [] memory) {
+        return lotteryIDEntrancesMapping[lotteryID];
+    }
+
     function changeCreatorFee(uint _newFee) public onlyOwner {
         creatorFee = _newFee;
     }
